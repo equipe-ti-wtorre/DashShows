@@ -1,0 +1,9 @@
+node_modules/
+config.json
+data/shows.json
+data/siport.json
+data/siport-demo.json
+docs/demo.json
+docs/siport-demo.json
+.env
+.env.*

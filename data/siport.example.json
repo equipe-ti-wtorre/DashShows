@@ -1,0 +1,60 @@
+{
+  "fonte": "demo",
+  "intervaloSegundos": 15,
+  "inicioPadrao": "16:00",
+  "viradaHora": "06:00",
+  "local": "Nubank Parque",
+  "demoArquivo": "docs/siport-demo.json",
+  "db": {
+    "auth": "sql",
+    "server": "",
+    "instance": "",
+    "port": 1433,
+    "database": "SIPORTNTACC",
+    "domain": "",
+    "user": "",
+    "password": "",
+    "encrypt": false,
+    "trustServerCertificate": true
+  },
+  "admin": {
+    "salt": "",
+    "hash": ""
+  },
+  "filtros": {
+    "versoes": ["10", "19", "14"],
+    "persField1": ["10", "19", "14", "25"],
+    "tenantId": "1070",
+    "alarmesLike": [
+      "In/Out Control",
+      "Not went through",
+      "obsolet",
+      "wrong access level",
+      "valid",
+      "double",
+      "unknow"
+    ],
+    "catracasExcluir": [
+      "B1",
+      "AZP",
+      "CCO",
+      "Broadcast",
+      "Sub",
+      "Data",
+      "BIL",
+      "GSH",
+      "NOC",
+      "Estoque",
+      "BRAVO"
+    ]
+  },
+  "zabbix": {
+    "url": "",
+    "token": "",
+    "host": "SRVAP-SIPORT01",
+    "cpuItem": "CPU utilization",
+    "cpuTag": "component:cpu",
+    "memoriaItem": "Memory utilization",
+    "trustServerCertificate": true
+  }
+}

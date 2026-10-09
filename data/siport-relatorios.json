@@ -1,0 +1,61 @@
+{
+  "2026-10-01": {
+    "date": "2026-10-01",
+    "origem": "automático",
+    "arquivo": "/var/dashshows/relatorios/2026/10.2026/01 - Evento/Evento 01.10.26.xlsx",
+    "linhas": {
+      "Relatorio_BasedeDados": 13675,
+      "Relatorio Alarmes": 3097,
+      "Relatorio Acessos": 3341
+    },
+    "inicio": "08:00",
+    "em": "2026-10-01 23:50:28"
+  },
+  "2026-10-02": {
+    "date": "2026-10-02",
+    "origem": "automático",
+    "arquivo": "/var/dashshows/relatorios/2026/10.2026/02 - Evento/Evento 02.10.26.xlsx",
+    "linhas": {
+      "Relatorio_BasedeDados": 14255,
+      "Relatorio Alarmes": 1726,
+      "Relatorio Acessos": 5300
+    },
+    "inicio": "08:00",
+    "em": "2026-10-02 23:50:41"
+  },
+  "2026-10-03": {
+    "date": "2026-10-03",
+    "origem": "automático",
+    "pulado": "nenhuma leitura de catraca no dia",
+    "inicio": "08:00",
+    "em": "2026-10-03 23:50:59"
+  },
+  "2026-10-04": {
+    "date": "2026-10-04",
+    "origem": "automático",
+    "pulado": "nenhuma leitura de catraca no dia",
+    "inicio": "08:00",
+    "em": "2026-10-04 23:50:30"
+  },
+  "2026-10-05": {
+    "date": "2026-10-05",
+    "origem": "automático",
+    "pulado": "nenhuma leitura de catraca no dia",
+    "inicio": "08:00",
+    "em": "2026-10-05 23:50:53"
+  },
+  "2026-10-06": {
+    "date": "2026-10-06",
+    "origem": "automático",
+    "pulado": "nenhuma leitura de catraca no dia",
+    "inicio": "08:00",
+    "em": "2026-10-06 23:50:24"
+  },
+  "2026-10-07": {
+    "date": "2026-10-07",
+    "origem": "automático",
+    "pulado": "nenhuma leitura de catraca no dia",
+    "inicio": "08:00",
+    "em": "2026-10-07 23:50:49"
+  }
+}

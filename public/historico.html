@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="default">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Histórico — DashShows</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/historico.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
+  <script src="/export-pdf.js" defer></script>
+  <script src="/historico.charts.js" defer></script>
+  <script src="/historico.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand-block">
+        <img class="brand-logo is-default" id="brandLogo" src="/logo-nubank-parque.png" alt="Nubank Parque" />
+        <div class="eyebrow">DashShows</div>
+        <h1>Histórico de acessos e clima</h1>
+        <p class="lead">Evolução do público na abertura e clima ao longo de toda a coleta até o fim do evento.</p>
+      </div>
+      <div class="topbar-actions">
+        <label class="field show-field">
+          <span>Evento</span>
+          <select id="showSelect" disabled>
+            <option value="">Carregando…</option>
+          </select>
+        </label>
+        <button type="button" class="btn btn-ghost" id="exportPdfBtn" hidden>Exportar PDF</button>
+        <a class="btn btn-ghost" href="/">Dashboard ao vivo</a>
+      </div>
+    </header>
+
+    <div id="statusMsg" class="status-msg" hidden></div>
+
+    <section id="metaBar" class="meta-bar" hidden>
+      <div>
+        <span class="meta-label">Evento</span>
+        <strong id="metaTitle">—</strong>
+      </div>
+      <div>
+        <span class="meta-label">Data</span>
+        <strong id="metaDate">—</strong>
+      </div>
+      <div>
+        <span class="meta-label">Abertura</span>
+        <strong id="metaGate">—</strong>
+      </div>
+      <div>
+        <span class="meta-label">Janela</span>
+        <strong id="metaWindow">—</strong>
+      </div>
+    </section>
+
+    <section id="kpiGrid" class="kpi-grid" hidden>
+      <article class="kpi">
+        <span class="kpi-label">Público entrante</span>
+        <strong class="kpi-value" id="kpiEntered">—</strong>
+        <span class="kpi-sub" id="kpiCapacity">—</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Ocupação</span>
+        <strong class="kpi-value" id="kpiOccupancy">—</strong>
+        <span class="kpi-sub" id="kpiRemaining">—</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Pico de fluxo</span>
+        <strong class="kpi-value" id="kpiPeakFlow">—</strong>
+        <span class="kpi-sub">por minuto</span>
+      </article>
+      <article class="kpi kpi-weather">
+        <span class="kpi-label">Clima ~1h antes</span>
+        <strong class="kpi-value">
+          <span class="kpi-weather-icon" id="kpiWeatherStartIcon" aria-hidden="true">☁️</span>
+          <span id="kpiWeatherStart">—</span>
+        </strong>
+        <span class="kpi-sub" id="kpiWeatherStartLabel">—</span>
+      </article>
+      <article class="kpi kpi-weather">
+        <span class="kpi-label">Clima no fim</span>
+        <strong class="kpi-value">
+          <span class="kpi-weather-icon" id="kpiWeatherEndIcon" aria-hidden="true">☁️</span>
+          <span id="kpiWeatherEnd">—</span>
+        </strong>
+        <span class="kpi-sub" id="kpiWeatherEndLabel">—</span>
+      </article>
+    </section>
+
+    <section class="charts">
+      <article class="chart-panel">
+        <header class="chart-head">
+          <h2>Evolução dos acessos</h2>
+          <p id="accessChartDesc">Público acumulado (área) e fluxo por minuto (barras)</p>
+        </header>
+        <div class="chart-wrap">
+          <canvas id="accessChart"></canvas>
+        </div>
+      </article>
+      <article class="chart-panel">
+        <header class="chart-head">
+          <h2>
+            <span class="chart-weather-icon" id="weatherChartIcon" aria-hidden="true">🌤️</span>
+            Evolução do clima
+          </h2>
+          <p id="weatherChartDesc">Temperatura, vento e precipitação no dia do evento · linha tracejada = abertura de portões do show</p>
+        </header>
+        <div class="chart-wrap">
+          <canvas id="weatherChart"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <!-- Evolução por setor (3 modos) -->
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Evolução das entradas por setor</h2>
+          <p class="desc">Acúmulo por setor ao longo do evento · clique na legenda para isolar</p>
+        </div>
+        <div class="seg">
+          <button id="evo-mode-lines" class="active" onclick="setSectorMode('lines')">Linhas</button>
+          <button id="evo-mode-stack" onclick="setSectorMode('stack')">Empilhado</button>
+          <button id="evo-mode-pct" onclick="setSectorMode('pct')">%</button>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:380px"><canvas id="evoChart"></canvas></div>
+    </section>
+
+    <!-- Total por setor + Portões, lado a lado -->
+    <div class="grid2">
+      <section class="panel">
+        <h2>Entradas por setor · total</h2>
+        <div class="chart-wrap" style="height:280px"><canvas id="sectorTotalChart"></canvas></div>
+      </section>
+      <section class="panel">
+        <h2>Entradas por portão</h2>
+        <div class="chart-wrap" style="height:280px"><canvas id="gateChart"></canvas></div>
+      </section>
+    </div>
+
+    <!-- Ocorrências de catraca -->
+    <section class="panel">
+      <h2>Ocorrências de catraca</h2>
+      <div class="errors" id="errorCards"></div>
+    </section>
+  </div>
+</body>
+</html>

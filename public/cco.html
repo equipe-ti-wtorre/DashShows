@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CCO — Controle de Acesso</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/cco.css" />
+</head>
+<body>
+  <div class="shell" id="exportRoot">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img class="venue-logo is-default" id="venueLogo" src="/logo-nubank-parque.png" alt="Nubank Parque" />
+        <div class="event-block">
+          <h1 class="event-title" id="eventName">Carregando…</h1>
+          <div class="event-meta">
+            <span id="venueName">—</span>
+            <span class="dot">·</span>
+            <span id="venueCity">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topbar-center">
+        <div class="stat-block weather-line hidden" id="weatherBlock">
+          <span id="wNowIcon">—</span>
+          <span class="mono" id="wNowTemp">—</span>
+          <span class="weather-muted">agora</span>
+          <span class="weather-sep">|</span>
+          <span>🌡️</span>
+          <span class="mono weather-gold" id="wTempRange">—</span>
+          <span class="weather-sep">|</span>
+          <span id="wDayIcon">—</span>
+          <span id="wDayLabel">—</span>
+          <span class="weather-sep">|</span>
+          <span>💧</span>
+          <span class="mono weather-blue" id="wPrecip">—</span>
+          <span class="weather-sep">|</span>
+          <span>💨</span>
+          <span class="mono weather-dim" id="wWind">—</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="stat-block clock-stat">
+          <div class="block-label">Hora atual</div>
+          <div class="stat-value mono" id="clockTime">--:--:--</div>
+        </div>
+        <div class="stat-block clock-stat">
+          <div class="block-label" id="countdownLabel">Abertura dos portões em</div>
+          <div class="stat-value mono" id="countdownValue">--:--:--</div>
+        </div>
+        <button type="button" class="btn-export-pdf pdf-hide" id="exportPdfBtn" title="Exportar PDF" hidden>PDF</button>
+      </div>
+    </header>
+
+    <section class="main">
+      <aside class="stack-col">
+        <article class="card card-poster is-empty" id="posterWrap">
+          <img id="showArt" alt="Arte do show" />
+          <div class="poster-empty" id="posterEmpty">Sem imagem configurada</div>
+        </article>
+        <article class="card card-gauge">
+          <div class="card-head">
+            <div class="card-title">Ocupação</div>
+            <div class="card-badge mono">ao vivo</div>
+          </div>
+          <div class="gauge-wrap">
+            <svg class="gauge" viewBox="0 0 120 120" aria-hidden="true">
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#2dd4bf" />
+                  <stop offset="100%" stop-color="#5eead4" />
+                </linearGradient>
+              </defs>
+              <circle class="gauge-track" cx="60" cy="60" r="52" />
+              <circle class="gauge-progress" id="gaugeProgress" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="gauge-center">
+              <div class="gauge-pct mono" id="gaugePct">0%</div>
+              <div class="gauge-center-label">Ocupação</div>
+              <div class="gauge-flow" id="gaugeFlow">Aguardando fluxo</div>
+            </div>
+          </div>
+          <div class="gauge-legend">
+            <div class="legend-item">
+              <i class="legend-dot" style="background: var(--entered)"></i>
+              <span class="legend-name">Entraram</span>
+              <strong class="mono" id="gaugeEntered">0</strong>
+            </div>
+            <div class="legend-item">
+              <i class="legend-dot" style="background: var(--remaining)"></i>
+              <span class="legend-name">Faltam</span>
+              <strong class="mono" id="gaugeRemaining">0</strong>
+            </div>
+          </div>
+        </article>
+      </aside>
+
+      <div class="main-right">
+        <section class="kpis" id="kpis">
+          <article class="kpi" data-rail="brand">
+            <div class="kpi-label">Capacidade</div>
+            <div class="kpi-value mono" id="kpiCapacity">—</div>
+          </article>
+          <article class="kpi" data-rail="entered">
+            <div class="kpi-label">Entraram</div>
+            <div class="kpi-value mono" id="kpiEntered">—</div>
+          </article>
+          <article class="kpi" data-rail="remaining">
+            <div class="kpi-label">Faltam entrar</div>
+            <div class="kpi-value mono" id="kpiRemaining">—</div>
+          </article>
+          <article class="kpi" data-rail="blocked">
+            <div class="kpi-label">Bloqueados</div>
+            <div class="kpi-value mono" id="kpiBlocked">—</div>
+          </article>
+          <article class="kpi" data-rail="gold">
+            <div class="kpi-label">Ocupação %</div>
+            <div class="kpi-value mono" id="kpiOccupancy">—</div>
+            <div class="kpi-sub" id="kpiPace">Ritmo: —</div>
+          </article>
+          <article class="kpi" data-rail="info">
+            <div class="kpi-label">Fluxo · último minuto</div>
+            <div class="kpi-value mono" id="kpiFlow">—</div>
+            <div class="kpi-sub" id="kpiFlowPeak">pico: — /min</div>
+          </article>
+          <article class="kpi hidden" data-rail="quebra" id="kpiQuebraCard">
+            <div class="kpi-label">Quebra</div>
+            <div class="kpi-value mono" id="kpiQuebra">—</div>
+            <div class="kpi-sub">ingressos sem entrada</div>
+          </article>
+        </section>
+
+        <section class="cards-row">
+          <article class="card card-sectors">
+            <div class="card-head">
+              <div class="card-title">Setores</div>
+              <div class="legend-inline">
+                <span><i class="swatch faltante"></i> Faltante</span>
+                <span><i class="swatch entrante"></i> Entrante</span>
+              </div>
+              <div class="card-badge mono" id="sectorsBadge">—</div>
+            </div>
+            <div class="divergent" id="sectorsChart"></div>
+            <div class="divergent-axis" id="sectorsAxis"></div>
+          </article>
+
+          <article class="card card-gates">
+            <div class="card-head">
+              <div class="card-title">Portões</div>
+            </div>
+            <div class="bars-list" id="gatesList"></div>
+          </article>
+
+          <article class="card card-errors">
+            <div class="card-head">
+              <div class="card-title">Erros</div>
+            </div>
+            <div class="bars-list" id="errorsList"></div>
+          </article>
+        </section>
+      </div>
+    </section>
+
+    <section class="card card-chart">
+      <div class="chart-header">
+        <div class="card-title">Acessos por hora</div>
+        <div class="peak-badge mono" id="peakBadge">pico · —</div>
+      </div>
+      <div class="chart" id="hourChart"></div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-left" id="footerMeta">Aguardando primeira atualização…</div>
+      <div class="footer-error" id="footerError"></div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
+  <script src="/export-pdf.js" defer></script>
+  <script src="/cco.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "eventId": "",
+  "apiKey": "",
+  "showId": "",
+  "port": 4173,
+  "pollIntervalMs": 15000,
+  "gateOpenHour": 16,
+  "showArtUrl": "",
+  "eyebrowText": "",
+  "venueName": ""
+}

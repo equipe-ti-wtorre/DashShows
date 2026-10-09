@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DashShows · Administração</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+  <div id="loginView" class="login-shell hidden">
+    <form id="loginForm" class="login-card" autocomplete="on">
+      <div class="wordmark">DashShows <span>· administração</span></div>
+      <h1>Área administrativa</h1>
+      <p class="login-help">Entre com a senha de administrador para gerenciar shows, logos e artes.</p>
+      <label class="field">
+        <span>Senha</span>
+        <input type="password" id="loginPassword" name="password" required autofocus />
+      </label>
+      <button type="submit" class="btn primary wide" id="loginBtn">Entrar</button>
+      <div class="form-error" id="loginError"></div>
+    </form>
+  </div>
+
+  <div id="appView" class="app hidden">
+    <header class="topbar">
+      <div class="wordmark">DashShows <span>· administração</span></div>
+      <div class="env mono" id="envBadge">—</div>
+      <div class="spacer"></div>
+      <button type="button" class="btn ghost" id="btnSettings">Configurações</button>
+      <a class="btn ghost" href="/" target="_blank" rel="noopener">Ver dashboard ao vivo</a>
+      <button type="button" class="btn ghost" id="logoutBtn">Sair</button>
+    </header>
+
+    <div class="body">
+      <aside class="sidebar">
+        <div class="side-head">
+          <div class="search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="text" id="showSearch" placeholder="Buscar show ou slug" />
+          </div>
+          <div class="filters" id="showFilters">
+            <button type="button" class="chip" data-filter="all" aria-pressed="true">Todos</button>
+            <button type="button" class="chip" data-filter="live" aria-pressed="false">No ar</button>
+            <button type="button" class="chip" data-filter="done" aria-pressed="false">Finalizados</button>
+          </div>
+        </div>
+        <div class="side-list" id="showsList"></div>
+        <div class="side-foot">
+          <button type="button" class="btn wide" id="newShowBtn">Novo show</button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <form id="showForm" class="editor-form">
+          <input type="hidden" id="showId" />
+          <input type="hidden" id="logoUrl" />
+          <input type="hidden" id="showArtUrl" />
+          <input type="hidden" id="showTheme" value="" />
+
+          <div id="viewEditor">
+            <div class="editor-head">
+              <div class="title-row">
+                <div>
+                  <h1 id="formTitle">Novo show</h1>
+                  <div class="urlbar" id="urlBox" hidden>
+                    <span class="mono" id="publicUrlText">—</span>
+                    <button type="button" class="linkbtn" id="copyUrlBtn">Copiar link</button>
+                    <button type="button" class="linkbtn" id="openUrlBtn">Abrir</button>
+                  </div>
+                </div>
+                <span class="state" id="showState">Rascunho · não publicado</span>
+              </div>
+
+              <nav class="tabs" role="tablist">
+                <button type="button" class="tab" role="tab" aria-selected="true" data-tab="geral">Geral</button>
+                <button type="button" class="tab" role="tab" aria-selected="false" data-tab="setores">Setores <span class="count" id="sectorsCount"></span></button>
+                <button type="button" class="tab" role="tab" aria-selected="false" data-tab="visual">Visual</button>
+                <button type="button" class="tab" role="tab" aria-selected="false" data-tab="fonte">Fonte de dados</button>
+              </nav>
+            </div>
+
+            <div class="main-scroll">
+              <div class="wrap">
+                <div data-panel="geral">
+                  <div class="cols">
+                    <div>
+                      <section class="section">
+                        <h2>Evento</h2>
+                        <p class="hint">O que aparece nos telões e no painel público.</p>
+                        <div class="grid2">
+                          <div class="field full">
+                            <label for="eventName">Nome na tela</label>
+                            <input id="eventName" type="text" maxlength="160" />
+                            <span class="help">Exibido em caixa alta no dashboard.</span>
+                          </div>
+                          <div class="field">
+                            <label for="title">Título administrativo</label>
+                            <input id="title" type="text" required maxlength="160" />
+                          </div>
+                          <div class="field">
+                            <label for="slug">Slug</label>
+                            <input id="slug" type="text" class="mono" maxlength="80" placeholder="gerado automaticamente" />
+                          </div>
+                          <div class="field">
+                            <label for="eventDate">Data do evento</label>
+                            <input id="eventDate" type="date" />
+                          </div>
+                          <div class="field">
+                            <label for="gateOpenTime">Abertura dos portões</label>
+                            <input id="gateOpenTime" type="time" value="16:00" />
+                          </div>
+                        </div>
+                      </section>
+
+                      <section class="section">
+                        <h2>Local e clima</h2>
+                        <p class="hint">As coordenadas alimentam o bloco de clima do dashboard.</p>
+                        <div class="grid2">
+                          <div class="field">
+                            <label for="venueName">Local</label>
+                            <input id="venueName" type="text" maxlength="200" />
+                          </div>
+                          <div class="field">
+                            <label for="venueCity">Cidade</label>
+                            <input id="venueCity" type="text" maxlength="120" />
+                          </div>
+                          <div class="field full">
+                            <label class="inline-toggle">
+                              <input type="checkbox" id="coordManual" />
+                              <span class="switch"></span>
+                              Informar coordenadas manualmente
+                            </label>
+                            <span class="help">Desligado: usa <span class="mono">−23,5274 / −46,6794</span>, resolvido pela cidade.</span>
+                          </div>
+                          <div class="field" id="coordLatField" hidden>
+                            <label for="weatherLat">Latitude</label>
+                            <input id="weatherLat" type="text" class="mono" value="-23.5274" />
+                          </div>
+                          <div class="field" id="coordLonField" hidden>
+                            <label for="weatherLon">Longitude</label>
+                            <input id="weatherLon" type="text" class="mono" value="-46.6794" />
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+
+                    <aside class="preview">
+                      <div class="preview-card pv-dash" data-pv-root data-pv-layout="cco">
+                        <div class="pv-topbar">
+                          <img class="pv-logo-img" data-pv-logo-img alt="Logo" />
+                          <div class="pv-titles">
+                            <div class="ev" data-pv-event>—</div>
+                            <div class="sub" data-pv-sub>—</div>
+                          </div>
+                        </div>
+                        <div class="pv-kpis" aria-hidden="true">
+                          <div class="pv-kpi"><span>Capacidade</span><b>—</b></div>
+                          <div class="pv-kpi"><span>Entraram</span><b>—</b></div>
+                          <div class="pv-kpi"><span>Faltam</span><b>—</b></div>
+                          <div class="pv-kpi"><span>Ocupação</span><b>—</b></div>
+                        </div>
+                        <div class="pv-main">
+                          <div class="pv-poster" data-pv-art-frame>
+                            <img data-pv-art-img alt="Arte do show" />
+                            <span data-pv-art-empty>Sem imagem</span>
+                          </div>
+                          <div class="pv-side-card">
+                            <div class="pv-side-title">Ocupação</div>
+                            <div class="pv-gauge"></div>
+                          </div>
+                          <div class="pv-side-card">
+                            <div class="pv-side-title">Setores</div>
+                            <div class="pv-sector-lines"><i></i><i></i><i></i><i></i></div>
+                          </div>
+                        </div>
+                      </div>
+                      <p class="pv-cap">Prévia no tamanho do cartaz do dashboard</p>
+                    </aside>
+                  </div>
+                </div>
+
+                <div data-panel="setores" hidden>
+                  <section class="section">
+                    <h2>Setores</h2>
+                    <p class="hint" id="sectorsHint">Os códigos vêm do SiPort. Renomeie livremente — o nome da tela é o que o público vê.</p>
+                    <div id="sectorsCcoBox">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th style="width:180px">Código no SiPort</th>
+                            <th>Nome na tela</th>
+                            <th style="width:110px;text-align:right">Ingressos</th>
+                            <th style="width:44px"></th>
+                          </tr>
+                        </thead>
+                        <tbody id="sectorsList"></tbody>
+                      </table>
+                      <div class="row-actions">
+                        <button type="button" class="btn" id="loadSectorsBtn">Carregar setores do SiPort</button>
+                        <button type="button" class="btn ghost" id="addSectorBtn">Adicionar setor manual</button>
+                        <span class="help" id="sectorsMsg"></span>
+                      </div>
+                    </div>
+                    <p class="hint" id="sectorsEmpty" hidden>Setores só se aplicam a shows SiPort / CCO. Troque a fonte de dados na aba Fonte.</p>
+                  </section>
+                </div>
+
+                <div data-panel="visual" hidden>
+                  <div class="cols">
+                    <div>
+                      <section class="section">
+                        <h2>Imagens</h2>
+                        <p class="hint">PNG ou JPG. O logo aparece no topo; a arte ocupa o painel central.</p>
+                        <div class="grid2">
+                          <div class="field full">
+                            <label>Logo</label>
+                            <div class="drop">
+                              <div class="thumb" id="logoThumb">logo</div>
+                              <div class="info">
+                                <div class="fn" id="logoName">Nenhum arquivo</div>
+                                <div class="fs" id="logoMeta">PNG ou JPG</div>
+                              </div>
+                              <button type="button" class="btn ghost" id="changeLogoBtn">Trocar</button>
+                              <button type="button" class="rowbtn" id="clearLogoBtn" aria-label="Remover logo">✕</button>
+                              <input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden />
+                            </div>
+                          </div>
+                          <div class="field full">
+                            <label>Arte do show</label>
+                            <div class="drop">
+                              <div class="thumb art" id="artThumb">arte</div>
+                              <div class="info">
+                                <div class="fn" id="artName">Nenhum arquivo</div>
+                                <div class="fs" id="artMeta">PNG ou JPG</div>
+                              </div>
+                              <button type="button" class="btn ghost" id="changeArtBtn">Trocar</button>
+                              <button type="button" class="rowbtn" id="clearArtBtn" aria-label="Remover arte">✕</button>
+                              <input type="file" id="artFile" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden />
+                            </div>
+                            <div class="art-fit-preview" id="artPreview">
+                              <img id="artPreviewImg" alt="Prévia no dash" hidden />
+                              <span id="artPreviewEmpty">Sem imagem</span>
+                            </div>
+                            <small class="art-fit-hint">Recorte como no dash. Arraste a imagem para posicionar.</small>
+                            <div class="art-fit-controls" id="artFitControls" hidden>
+                              <label class="art-fit-slider">
+                                <span>Zoom <em id="artZoomVal">1.00x</em></span>
+                                <input type="range" id="artZoom" min="0.5" max="3" step="0.05" value="1" />
+                              </label>
+                              <label class="art-fit-slider">
+                                <span>Horizontal <em id="artXVal">50%</em></span>
+                                <input type="range" id="artX" min="0" max="100" step="1" value="50" />
+                              </label>
+                              <label class="art-fit-slider">
+                                <span>Vertical <em id="artYVal">50%</em></span>
+                                <input type="range" id="artY" min="0" max="100" step="1" value="50" />
+                              </label>
+                              <button type="button" class="btn ghost" id="artFitReset">Resetar enquadramento</button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section class="section">
+                        <h2>Paleta</h2>
+                        <p class="hint">Vale para este show. Para mudar o padrão de todos, veja Configurações.</p>
+                        <div class="palettes" id="showThemeOptions">
+                          <button type="button" class="pal" data-theme="" aria-pressed="true">
+                            <div class="swatches">
+                              <span class="sw" style="background:#8D0DE3"></span>
+                              <span class="sw" style="background:#A585C2"></span>
+                              <span class="sw" style="background:#16002A"></span>
+                              <span class="sw" style="background:#7D5C9B"></span>
+                            </div>
+                            <div class="pn">Herdar padrão</div>
+                            <div class="pd">Usa a paleta de Configurações</div>
+                          </button>
+                          <button type="button" class="pal" data-theme="default" aria-pressed="false">
+                            <div class="swatches">
+                              <span class="sw" style="background:#8D0DE3"></span>
+                              <span class="sw" style="background:#E8B93B"></span>
+                              <span class="sw" style="background:#16002A"></span>
+                              <span class="sw" style="background:#3BA55D"></span>
+                            </div>
+                            <div class="pn">Padrão</div>
+                            <div class="pd">Roxo e dourado</div>
+                          </button>
+                          <button type="button" class="pal" data-theme="nubank-parque" aria-pressed="false">
+                            <div class="swatches">
+                              <span class="sw" style="background:#8D0DE3"></span>
+                              <span class="sw" style="background:#420465"></span>
+                              <span class="sw" style="background:#C9E2BF"></span>
+                              <span class="sw" style="background:#A7D296"></span>
+                            </div>
+                            <div class="pn">Nubank Parque</div>
+                            <div class="pd">Core Purple com herança verde</div>
+                          </button>
+                        </div>
+                      </section>
+                    </div>
+
+                    <aside class="preview">
+                      <div class="preview-card pv-dash" data-pv-root data-pv-layout="cco">
+                        <div class="pv-topbar">
+                          <img class="pv-logo-img" data-pv-logo-img alt="Logo" />
+                          <div class="pv-titles">
+                            <div class="ev" data-pv-event>—</div>
+                            <div class="sub" data-pv-sub>—</div>
+                          </div>
+                        </div>
+                        <div class="pv-kpis" aria-hidden="true">
+                          <div class="pv-kpi"><span>Capacidade</span><b>—</b></div>
+                          <div class="pv-kpi"><span>Entraram</span><b>—</b></div>
+                          <div class="pv-kpi"><span>Faltam</span><b>—</b></div>
+                          <div class="pv-kpi"><span>Ocupação</span><b>—</b></div>
+                        </div>
+                        <div class="pv-main">
+                          <div class="pv-poster" data-pv-art-frame>
+                            <img data-pv-art-img alt="Arte do show" />
+                            <span data-pv-art-empty>Sem imagem</span>
+                          </div>
+                          <div class="pv-side-card">
+                            <div class="pv-side-title">Ocupação</div>
+                            <div class="pv-gauge"></div>
+                          </div>
+                          <div class="pv-side-card">
+                            <div class="pv-side-title">Setores</div>
+                            <div class="pv-sector-lines"><i></i><i></i><i></i><i></i></div>
+                          </div>
+                        </div>
+                      </div>
+                      <p class="pv-cap">Prévia no tamanho do cartaz do dashboard</p>
+                    </aside>
+                  </div>
+                </div>
+
+                <div data-panel="fonte" hidden>
+                  <section class="section" style="max-width:640px">
+                    <h2>De onde vêm os números</h2>
+                    <p class="hint">A escolha define quais campos abaixo aparecem e qual dashboard é montado.</p>
+                    <div class="grid2">
+                      <div class="field full">
+                        <label for="showType">Sistema de acesso</label>
+                        <div class="selectwrap">
+                          <select id="showType">
+                            <option value="cco">SiPort — catracas (CCO)</option>
+                            <option value="bepass">BePass — facial</option>
+                            <option value="boletius">Boletus — bilheteria</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="ccoFields" class="type-fields hidden">
+                      <div class="grid2">
+                        <div class="field full">
+                          <label for="version">Versões do SiPort</label>
+                          <input id="version" type="text" class="mono" placeholder="10, 14" />
+                          <span class="help">Filtra <span class="mono">DATA_20_Version_VN</span>. Vazio lê todas.</span>
+                        </div>
+                        <div class="field full">
+                          <label class="inline-toggle">
+                            <input type="checkbox" id="mockData" />
+                            <span class="switch"></span>
+                            Modo simulação — gera números falsos, sem tocar no SQL Server
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="boletiusFields" class="type-fields hidden">
+                      <div class="grid2">
+                        <div class="field">
+                          <label for="eventId">Event ID (Boletius)</label>
+                          <input id="eventId" type="text" class="mono" />
+                        </div>
+                        <div class="field">
+                          <label for="showIdBoletius">Show ID (Boletius)</label>
+                          <input id="showIdBoletius" type="text" class="mono" />
+                        </div>
+                        <div class="field full">
+                          <label for="apiKey">API Key (Boletius)</label>
+                          <input id="apiKey" type="password" autocomplete="off" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="bepassFields" class="type-fields hidden">
+                      <div class="grid2">
+                        <div class="field">
+                          <label for="bepassEventId">Event ID (BePass)</label>
+                          <input id="bepassEventId" type="text" maxlength="64" placeholder="automático (evento ativo)" />
+                          <span class="help">Vazio detecta o jogo ativo. Só preencha para fixar um evento.</span>
+                        </div>
+                        <div class="field">
+                          <label for="companyId">Company / tenant</label>
+                          <input id="companyId" type="text" maxlength="64" placeholder="ex.: palmeiras" />
+                        </div>
+                        <div class="field">
+                          <label for="authUser">Usuário BePass</label>
+                          <input id="authUser" type="text" maxlength="200" autocomplete="off" />
+                        </div>
+                        <div class="field">
+                          <label for="authPassword">Senha BePass</label>
+                          <input id="authPassword" type="password" autocomplete="new-password" placeholder="deixe vazio para manter" />
+                        </div>
+                      </div>
+                      <details class="bepass-advanced" id="bepassAdvanced">
+                        <summary>Avançado (login Keycloak)</summary>
+                        <div class="grid2">
+                          <div class="field">
+                            <label for="clientId">Client ID</label>
+                            <input id="clientId" type="text" maxlength="120" placeholder="app-graph" />
+                          </div>
+                          <div class="field full">
+                            <label for="authUrl">URL de autenticação (token)</label>
+                            <input id="authUrl" type="url" maxlength="400" placeholder="https://authsso.bepass.app/realms/bepass/protocol/openid-connect/token" />
+                          </div>
+                        </div>
+                      </details>
+                    </div>
+                  </section>
+
+                  <section class="section" style="max-width:640px">
+                    <h2>Gravação de histórico</h2>
+                    <p class="hint">Acessos e clima gravados no MySQL a cada intervalo, durante o evento.</p>
+                    <div class="grid2">
+                      <div class="field full">
+                        <label class="inline-toggle">
+                          <input type="checkbox" id="historyEnabledShow" checked />
+                          <span class="switch"></span>
+                          Gravar histórico deste show
+                        </label>
+                      </div>
+                      <div class="field">
+                        <label for="historyIntervalSecShow">Intervalo</label>
+                        <input id="historyIntervalSecShow" type="number" value="60" min="15" max="3600" />
+                        <span class="help">Segundos, entre 15 e 3600. Vazio usa o padrão global.</span>
+                      </div>
+                    </div>
+                    <p class="hint" style="margin-top:14px">
+                      Credenciais do SQL Server e do MySQL são as mesmas para todos os shows e ficam em
+                      <button type="button" class="linkbtn" id="lnkSettings">Configurações → Conexões</button>.
+                    </p>
+                  </section>
+                </div>
+              </div>
+            </div>
+
+            <div class="savebar">
+              <div class="inner">
+                <span class="dirty" id="dirtyLabel" hidden><span class="dot live"></span><span id="dirtyText">Alterações não salvas</span></span>
+                <div class="form-msg" id="formMsg"></div>
+                <div class="spacer"></div>
+                <button type="button" class="btn ghost" id="discardBtn">Descartar</button>
+                <button type="submit" class="btn primary" id="saveBtn">Salvar</button>
+                <button type="button" class="btn" id="publishBtn">Publicar</button>
+                <button type="button" class="btn" id="setHomeBtn">Definir padrão</button>
+                <button type="button" class="btn" id="duplicateBtn">Duplicar</button>
+                <button type="button" class="btn" id="finalizeBtn">Finalizar evento</button>
+                <button type="button" class="btn" id="reopenBtn">Reabrir evento</button>
+                <button type="button" class="btn danger" id="deleteBtn">Excluir</button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div id="viewSettings" class="main-scroll" hidden>
+          <div class="wrap">
+            <button type="button" class="back" id="btnBack">← Voltar ao show</button>
+            <h1 class="settings-title">Configurações</h1>
+            <p class="settings-lead">Vale para todos os shows. Alterar aqui afeta os dashboards que estiverem no ar.</p>
+
+            <div class="settings-grid">
+              <form id="dbForm" class="card">
+                <h2>SQL Server — catracas</h2>
+                <p class="hint">Base de leitura do SiPort.</p>
+                <div class="status-line" id="dbStatus"><span class="dot draft"></span>Não testado nesta sessão</div>
+                <div class="grid2">
+                  <div class="field" style="grid-column:span 2">
+                    <label for="dbHost">Servidor</label>
+                    <input id="dbHost" type="text" class="mono" maxlength="200" />
+                  </div>
+                  <div class="field">
+                    <label for="dbPort">Porta</label>
+                    <input id="dbPort" type="number" min="1" max="65535" value="1433" />
+                  </div>
+                  <div class="field" style="grid-column:span 2">
+                    <label for="dbDatabase">Banco</label>
+                    <input id="dbDatabase" type="text" class="mono" maxlength="120" />
+                  </div>
+                  <div class="field">
+                    <label for="dbUser">Usuário</label>
+                    <input id="dbUser" type="text" class="mono" maxlength="120" />
+                  </div>
+                  <div class="field">
+                    <label for="dbPassword">Senha</label>
+                    <input id="dbPassword" type="password" autocomplete="new-password" placeholder="deixe vazio para manter" />
+                  </div>
+                  <div class="field full">
+                    <label class="inline-toggle">
+                      <input type="checkbox" id="dbEncrypt" />
+                      <span class="switch"></span>
+                      Criptografar a conexão
+                    </label>
+                  </div>
+                </div>
+                <div class="row-actions">
+                  <button type="button" class="btn" id="dbTestBtn">Testar conexão</button>
+                  <button type="submit" class="btn primary" id="dbSaveBtn">Salvar</button>
+                </div>
+                <div class="form-msg" id="dbMsg"></div>
+              </form>
+
+              <form id="historyForm" class="card">
+                <h2>MySQL — histórico</h2>
+                <p class="hint">Onde acessos e clima são gravados para os gráficos.</p>
+                <div class="status-line" id="historyStatus"><span class="dot draft"></span>Não testado nesta sessão</div>
+                <div class="grid2">
+                  <div class="field full">
+                    <label class="inline-toggle">
+                      <input type="checkbox" id="historyEnabled" />
+                      <span class="switch"></span>
+                      Salvar histórico de acessos e clima
+                    </label>
+                  </div>
+                  <div class="field" style="grid-column:span 2">
+                    <label for="historyHost">Servidor</label>
+                    <input id="historyHost" type="text" class="mono" maxlength="200" placeholder="127.0.0.1" />
+                  </div>
+                  <div class="field">
+                    <label for="historyPort">Porta</label>
+                    <input id="historyPort" type="number" min="1" max="65535" value="3306" />
+                  </div>
+                  <div class="field" style="grid-column:span 2">
+                    <label for="historyDatabase">Banco</label>
+                    <input id="historyDatabase" type="text" class="mono" maxlength="120" placeholder="dashshows" />
+                  </div>
+                  <div class="field">
+                    <label for="historyUser">Usuário</label>
+                    <input id="historyUser" type="text" class="mono" maxlength="120" />
+                  </div>
+                  <div class="field">
+                    <label for="historyPassword">Senha</label>
+                    <input id="historyPassword" type="password" autocomplete="new-password" placeholder="deixe vazio para manter" />
+                  </div>
+                  <div class="field full">
+                    <label for="historyIntervalSec">Intervalo padrão de gravação</label>
+                    <input id="historyIntervalSec" type="number" value="60" min="15" max="3600" />
+                    <span class="help">Segundos. Cada show pode sobrescrever.</span>
+                  </div>
+                </div>
+                <div class="row-actions">
+                  <button type="button" class="btn" id="historyTestBtn">Testar conexão</button>
+                  <button type="submit" class="btn primary" id="historySaveBtn">Salvar</button>
+                </div>
+                <div class="form-msg" id="historyMsg"></div>
+              </form>
+
+              <div class="card" style="grid-column:1/-1">
+                <h2>Paleta padrão</h2>
+                <p class="hint">Aplicada a shows novos e a quem não escolheu paleta própria.</p>
+                <div class="palettes" id="themeOptions" style="max-width:520px">
+                  <button type="button" class="pal" data-theme="default" aria-pressed="true">
+                    <div class="swatches">
+                      <span class="sw" style="background:#8D0DE3"></span>
+                      <span class="sw" style="background:#E8B93B"></span>
+                      <span class="sw" style="background:#16002A"></span>
+                      <span class="sw" style="background:#3BA55D"></span>
+                    </div>
+                    <div class="pn">Padrão</div>
+                    <div class="pd">Roxo e dourado</div>
+                  </button>
+                  <button type="button" class="pal" data-theme="nubank-parque" aria-pressed="false">
+                    <div class="swatches">
+                      <span class="sw" style="background:#8D0DE3"></span>
+                      <span class="sw" style="background:#420465"></span>
+                      <span class="sw" style="background:#C9E2BF"></span>
+                      <span class="sw" style="background:#A7D296"></span>
+                    </div>
+                    <div class="pn">Nubank Parque</div>
+                    <div class="pd">Core Purple com herança verde</div>
+                  </button>
+                </div>
+                <div class="row-actions">
+                  <button type="button" class="btn primary" id="themeSaveBtn">Salvar paleta</button>
+                </div>
+                <div class="form-msg" id="themeMsg"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/admin.js"></script>
+</body>
+</html>

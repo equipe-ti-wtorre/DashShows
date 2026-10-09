@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Importação de ingressos</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="/importacao.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="/siport-assets/logo-nubankparque-branco.svg" alt="" height="28">
+        <div><strong>Importação de ingressos</strong><span id="local">SiPort</span></div>
+      </div>
+      <span class="badge demo" id="demoBadge" hidden>DEMO · dados de planilha</span>
+      <div class="top-actions">
+        <div class="versions" id="versions" aria-label="Versões"></div>
+        <button class="pill" id="pause" type="button" title="Pausar atualização automática">Ao vivo</button>
+        <span class="conn" id="conn"><i></i><span>conectando…</span></span>
+      </div>
+    </div>
+    <nav class="tabs">
+      <a class="tab" href="/siport">Monitoramento</a>
+      <a class="tab on" href="/importacao" aria-current="page">Importação</a>
+    </nav>
+  </header>
+
+  <main>
+    <p class="error-box" id="pageError" hidden></p>
+    <div class="board">
+      <aside class="side">
+        <div class="poster" aria-hidden="true">
+          <img src="/logo-nubank-parque.png" alt="">
+        </div>
+        <article class="card clock-card">
+          <div class="clock-date" id="clockDate">--/--/----</div>
+          <div class="clock-time" id="clockTime">--:--:--</div>
+        </article>
+        <article class="card gauge-card">
+          <div class="card-title">CPU SIPORT</div>
+          <div class="ring" id="cpuRing" data-level="off">
+            <span class="gval" id="cpuVal">—</span>
+          </div>
+        </article>
+        <article class="card gauge-card">
+          <div class="card-title">Memória SIPORT</div>
+          <div class="ring" id="memRing" data-level="off">
+            <span class="gval" id="memVal">—</span>
+          </div>
+        </article>
+        <p class="hint" id="hostErro"></p>
+      </aside>
+
+      <section class="main-col">
+        <div class="top-stats">
+          <article class="card kernel-card">
+            <div class="card-title">Status Kernel Synchro</div>
+            <div class="big" id="kernelVal">—</div>
+            <div class="hint" id="kernelErro"></div>
+          </article>
+          <div class="quad">
+            <article class="card stat">
+              <div class="card-title">Total de ingressos</div>
+              <div class="big ok" id="totalVal">—</div>
+            </article>
+            <article class="card stat">
+              <div class="card-title">Fila de importação</div>
+              <div class="big" id="filaVal">—</div>
+              <div class="hint" id="filaErro"></div>
+            </article>
+            <article class="card stat">
+              <div class="card-title">Ingressos bloqueados</div>
+              <div class="big" id="bloqVal">—</div>
+            </article>
+            <article class="card stat">
+              <div class="card-title">Ingressos ativos</div>
+              <div class="big ok" id="ativosVal">—</div>
+              <div class="hint" id="totaisErro"></div>
+            </article>
+          </div>
+        </div>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Ingressos por perfil</h2>
+            <span class="legend-inline"><i class="sw ativos"></i>ATIVOS <i class="sw bloq"></i>BLOQUEADOS</span>
+          </div>
+          <div class="bars-layout">
+            <div id="bars" class="bars"></div>
+            <table class="legend" id="legend">
+              <tbody>
+                <tr><td><i class="sw ativos"></i>ATIVOS</td><td class="n" id="sumAtivos">—</td></tr>
+                <tr><td><i class="sw bloq"></i>BLOQUEADOS</td><td class="n" id="sumBloq">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="hint" id="perfisErro"></p>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <script src="/importacao.js"></script>
+</body>
+</html>

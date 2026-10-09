@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monitor de Ingressos</title>
+  <link rel="stylesheet" href="/siport.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="/siport-assets/logo-nubankparque-branco.svg" alt="" height="28">
+        <div><strong>Monitor de Ingressos</strong><span id="local">SiPort</span></div>
+      </div>
+      <span class="badge demo" id="demoBadge" hidden>DEMO · dados de planilha</span>
+      <div class="top-actions">
+        <label class="date">Dia do evento <input type="date" id="date"></label>
+        <label class="date" title="Leituras e alarmes antes deste horário são ignorados">Início <input type="time" id="inicio" step="60"></label>
+        <a class="pill" id="xlsx" href="#" title="Baixar a planilha das 3 views (base, alarmes, acessos) do dia e horário selecionados">⬇ Planilha .xlsx</a>
+        <button class="pill" id="pause" title="Pausar atualização automática">Ao vivo</button>
+        <span class="conn" id="conn"><i></i><span>conectando…</span></span>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab on" data-tab="monitor">Monitoramento</button>
+      <button class="tab" data-tab="consulta">Consulta de ingresso</button>
+      <button class="tab" data-tab="ingressos">Ingressos</button>
+      <button class="tab" data-tab="alarmes">Alarmes</button>
+      <button class="tab" data-tab="leituras">Leituras</button>
+      <button class="tab tab-end" data-tab="config">⚙ Configuração</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ================= MONITORAMENTO ================= -->
+    <section id="tab-monitor" class="view on">
+      <div class="kpis" id="kpis"></div>
+
+      <div class="card">
+        <div class="card-head"><h2>Entradas ao longo do evento</h2><span class="hint" id="janelaInfo"></span><span class="legend"><i class="sw sw-read"></i>leituras a cada 5 min <i class="sw sw-alarm"></i>alarmes</span></div>
+        <div id="chart" class="chart"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h2>Ingressos lidos por setor</h2></div>
+          <div id="setores" class="bars"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Alarmes por tipo</h2></div>
+          <div id="tipos" class="bars"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Blocos de catracas</h2><span class="hint">clique num bloco para ver cada catraca</span></div>
+        <div id="blocos" class="blocos"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h2>Últimas leituras</h2></div>
+          <div class="feed" id="feedLeituras"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Últimos alarmes</h2></div>
+          <div class="feed" id="feedAlarmes"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONSULTA ================= -->
+    <section id="tab-consulta" class="view">
+      <form class="search" id="searchForm" autocomplete="off">
+        <input id="q" type="text" inputmode="numeric" placeholder="Código do ingresso ou código de barras da ticketeira" autofocus>
+        <button class="btn primary" type="submit">Consultar</button>
+      </form>
+      <p class="hint center">Aceita leitor de código de barras (bipa e já consulta). Busca no dia do evento selecionado no topo.</p>
+      <div id="searchOut"></div>
+    </section>
+
+    <!-- ================= INGRESSOS ================= -->
+    <section id="tab-ingressos" class="view">
+      <div class="kpis kpis-sm" id="tKpis"></div>
+      <form class="filters" id="ticketForm">
+        <input id="tCodigo" type="text" placeholder="Código do ingresso ou código de barras">
+        <input id="tSetor" type="text" placeholder="Setor" list="tSetores">
+        <datalist id="tSetores"></datalist>
+        <select id="tVersao" title="Versão do ingresso (DATA_20_Version_VN)"><option value="">Todas as versões</option></select>
+        <select id="tStatus"><option value="">Lidos e não lidos</option><option value="lidos">Só lidos</option><option value="naolidos">Só não lidos</option></select>
+        <select id="tOrdem" title="Ordenar">
+          <option value="codigo">Ordenar por código</option><option value="setor">Por setor</option>
+          <option value="leitura">Leitura mais recente</option><option value="naolidos">Não lidos primeiro</option>
+        </select>
+        <span class="spacer"></span>
+        <button class="btn ghost" type="button" id="tCsv">Exportar CSV</button>
+      </form>
+      <div class="table-wrap"><table class="tbl" id="tTable"></table></div>
+      <div class="pager"><button class="btn ghost" type="button" id="tPrev">‹ Anterior</button><span class="count" id="tCount"></span><button class="btn ghost" type="button" id="tNext">Próxima ›</button></div>
+    </section>
+
+    <!-- ================= ALARMES ================= -->
+    <section id="tab-alarmes" class="view">
+      <form class="filters" id="alarmForm">
+        <select id="aTipo"><option value="">Todos os tipos</option></select>
+        <input id="aCatraca" type="text" placeholder="Catraca (ex.: PREMB)">
+        <input id="aCodigo" type="text" placeholder="Código do ingresso">
+        <label class="chk"><input type="checkbox" id="aPend"> só quem não entrou depois</label>
+        <span class="spacer"></span>
+        <span class="count" id="aCount"></span>
+        <button class="btn ghost" type="button" id="aCsv">Exportar CSV</button>
+      </form>
+      <div class="table-wrap"><table class="tbl" id="aTable"></table></div>
+    </section>
+
+    <!-- ================= LEITURAS ================= -->
+    <section id="tab-leituras" class="view">
+      <form class="filters" id="readForm">
+        <input id="rCatraca" type="text" placeholder="Catraca">
+        <input id="rSetor" type="text" placeholder="Setor">
+        <input id="rCodigo" type="text" placeholder="Código do ingresso">
+        <span class="spacer"></span>
+        <span class="count" id="rCount"></span>
+        <button class="btn ghost" type="button" id="rCsv">Exportar CSV</button>
+      </form>
+      <div class="table-wrap"><table class="tbl" id="rTable"></table></div>
+    </section>
+    <!-- ================= CONFIGURACAO ================= -->
+    <section id="tab-config" class="view">
+      <form class="card cfg-login" id="cfgLogin" hidden>
+        <h2>Senha de administrador</h2>
+        <p class="hint" id="cfgLoginMsg"></p>
+        <div class="row-inline"><input type="password" id="cfgAdminSenha" placeholder="Senha" autocomplete="current-password"><button class="btn primary" type="submit">Entrar</button></div>
+      </form>
+
+      <form id="cfgForm" class="cfg" autocomplete="off" hidden>
+        <div class="card">
+          <div class="card-head"><h2>Banco de dados SQL Server (SiPort)</h2><span class="hint">use um usuário somente leitura</span></div>
+          <div class="fields">
+            <label class="f">Autenticação
+              <select name="autenticacao"><option value="sql">SQL Server (usuário e senha)</option><option value="windows">Windows / domínio (NTLM)</option></select>
+            </label>
+            <label class="f">Servidor <input name="server" placeholder="ex.: 10.0.0.25 ou SRV-SIPORT" required></label>
+            <label class="f">Instância <input name="instanceName" placeholder="opcional, ex.: SQLEXPRESS"><small>com instância nomeada a porta é ignorada</small></label>
+            <label class="f">Porta <input name="port" type="number" min="1" max="65535" value="1433"></label>
+            <label class="f">Banco <input name="database" placeholder="nome do banco do SiPort" required></label>
+            <label class="f win-only">Domínio <input name="domain" placeholder="ex.: WTORRE"></label>
+            <label class="f">Usuário <input name="user" autocomplete="off"></label>
+            <label class="f">Senha <input name="password" type="password" autocomplete="new-password"><small id="pwHint"></small></label>
+            <label class="chk"><input type="checkbox" name="encrypt"> Criptografar conexão (TLS)</label>
+            <label class="chk"><input type="checkbox" name="trustServerCertificate" checked> Confiar no certificado do servidor</label>
+          </div>
+          <div class="actions">
+            <button class="btn ghost" type="button" id="cfgTest">Testar conexão</button>
+            <span class="hint" id="cfgTestMsg"></span>
+          </div>
+          <div id="cfgTestOut"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Painel</h2></div>
+          <div class="fields">
+            <label class="f">Fonte dos dados
+              <select name="modo"><option value="sql">Banco SQL Server</option><option value="demo">Demonstração (planilha)</option></select>
+            </label>
+            <label class="f">Atualizar a cada (segundos) <input name="refreshS" type="number" min="5" max="300"></label>
+            <label class="f">Início padrão do evento <input name="horaInicio" type="time" step="60"><small>horário inicial da janela; pode ser trocado no topo do painel</small></label>
+            <label class="f">Virada do dia (hora) <input name="viradaHora" type="number" min="0" max="12"><small>leituras até esta hora contam no dia anterior</small></label>
+            <label class="f">Nome do local <input name="nomeLocal"></label>
+          </div>
+        </div>
+
+        <details class="card">
+          <summary><h2>Filtros das views</h2><span class="hint">separe por vírgula</span></summary>
+          <div class="fields one">
+            <label class="f">Versões da base (DATA_20_Version_VN) <input name="versoes"></label>
+            <label class="f">Acessos: PersField1 <input name="zlogPersField1"></label>
+            <label class="f">Acessos: TenantID <input name="zlogTenantIds"></label>
+            <label class="f">Alarmes: textos incluídos <input name="alarmesIncluir"></label>
+            <label class="f">Alarmes: catracas excluídas <input name="alarmesExcluir"></label>
+          </div>
+        </details>
+
+        <div class="card">
+          <div class="card-head"><h2>Perfis → setor</h2><span class="hint">nome do setor para cadastros sem FREEDEF4 (credenciais)</span></div>
+          <label class="f">Uma linha por perfil ou combinação de perfis
+            <textarea name="perfisSetor" rows="6" spellcheck="false" placeholder="G080 = Cadeira Superior&#10;G060 = Cadeira Inferior&#10;CM03 = Camarote 3º andar&#10;G030,G050,G060 = Cad. Inferior C"></textarea>
+            <small>Combinação exata vale primeiro; senão, o nome de cada perfil. Sem nome, aparece “Perfil G080”.</small>
+          </label>
+          <div class="perfis-livres" id="perfisLivres"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Relatório .xlsx do evento</h2><span class="hint">as 3 views do relatório, arquivadas no fim do evento</span></div>
+          <div class="fields">
+            <label class="chk"><input type="checkbox" name="relAuto"> Gerar e arquivar automaticamente todo dia com evento</label>
+            <label class="f">Horário da geração automática <input name="relHora" type="time" step="60"><small>antes do SiPort limpar a base; hora antes da virada = relatório do dia anterior</small></label>
+            <label class="f">Pasta de arquivo <input name="relPasta"><small>cria &lt;ano&gt;\&lt;mês.ano&gt;\&lt;dia&gt; - &lt;show&gt;\&lt;Show dd.mm.aa&gt;.xlsx</small></label>
+            <label class="f">Agenda (nome do show) <input name="relAgenda"><small>events.json do projeto camarotes</small></label>
+          </div>
+          <div class="actions">
+            <button class="btn ghost" type="button" id="relSalvar">Gerar e salvar agora</button>
+            <span class="hint" id="relMsg"></span>
+          </div>
+          <ul class="rel-hist" id="relHist"></ul>
+        </div>
+
+        <details class="card">
+          <summary><h2>Acesso a esta tela</h2><span class="hint" id="secHint"></span></summary>
+          <div class="fields">
+            <label class="f">Nova senha de administrador <input name="novaSenhaAdmin" type="password" autocomplete="new-password" placeholder="mín. 6 caracteres"><small>exigida para abrir a configuração por outro computador da rede</small></label>
+            <label class="chk local-only"><input type="checkbox" name="removerSenhaAdmin"> Remover senha (configuração só nesta máquina)</label>
+          </div>
+        </details>
+
+        <div class="save-bar">
+          <span class="hint" id="cfgSaveMsg"></span>
+          <button class="btn primary" type="submit">Salvar e aplicar</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script src="/siport.js"></script>
+</body>
+</html>
